@@ -9,7 +9,7 @@ ATTENTION ! VEILLEZ A MANIPULER AVEC PRUDENCE LE FICHIER GÉNÉRÉ ET NE PAS L'O
 
 - Encodage du payload :
   - Base64
-  - XOr
+  - XOR
   - ROT13
   - Zlib
 - Génération de fichiers :
